@@ -67,6 +67,13 @@ void MyRobot::MyTimerSlot() {
     Mutex.unlock();
 }
 
+
+QTcpSocket* MyRobot::getSocket(){
+
+    return socket;
+}
+
+
 //hUSB is the serial port handle opened at 19200 baud
 void MyRobot::SetRobot1( short speed1,short speed2,unsigned char SpeedFlag)
 {
@@ -117,6 +124,19 @@ short MyRobot::VitesseFromRobot2(){
 
 
 }
+
+
+int MyRobot::BatterieFromRobot(){
+
+    int batterie;
+
+    batterie = DataReceived[2];
+
+    return batterie;
+
+
+}
+
 
 unsigned short MyRobot::Crc16(QByteArray tableau , unsigned char Taille_max)
 {

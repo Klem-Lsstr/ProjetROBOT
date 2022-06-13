@@ -13,6 +13,7 @@
 class MyRobot : public QObject {
     Q_OBJECT
 public:
+    QTcpSocket* getSocket();
     explicit MyRobot(QObject *parent = 0);
     void doConnect();
     void disConnect();
@@ -23,10 +24,12 @@ public:
     unsigned short Crc16(QByteArray tableau , unsigned char Taille_max);
     short VitesseFromRobot1();
     short VitesseFromRobot2();
+    int BatterieFromRobot();
 
 signals:
     void updateUI(const QByteArray Data);
 public slots:
+
     void connected();
     void disconnected();
     void bytesWritten(qint64 bytes);

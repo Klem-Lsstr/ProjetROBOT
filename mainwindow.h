@@ -41,8 +41,8 @@ private slots:
     void on_ButLeft_released();
 
     //Boutons connexion
-    /*void on_ButConnect_pressed();
-    void on_ButDisconnect_pressed();*/
+    void on_ButConnect_pressed();
+    void on_ButDisconnect_pressed();
 
 
     void on_CAM_DOWN_pressed();
@@ -53,11 +53,16 @@ private slots:
 
     void on_CAM_LEFT_pressed();
 
-    void on_V1_overflow();
+
+    void on_etatbatterie_valueChanged(int value);
+
+    void on_ButConnect_2_clicked();
 
 private:
+    int nb;
     Ui::MainWindow *ui;
     QNetworkAccessManager *manager;
     QNetworkRequest request;
+    int etatbatterie;
 };
 #endif // MAINWINDOW_H
