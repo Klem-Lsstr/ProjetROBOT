@@ -6,6 +6,7 @@
 #include <QKeyEvent>
 #include <QWebEngineView>
 #include <QNetworkAccessManager>
+#include <QDataStream>
 
 
 
@@ -24,12 +25,12 @@ public:
     bool Mouvement = false;
     void KeyPressEvent(QKeyEvent *e);
     void KeyReleaseEvent(QKeyEvent *e);
-    void AfficheVitesse();
 
 
 //Boutons interface graphique
 private slots:
-
+    void displaySensorsValues(MyRobot::Sensors sensors);
+    void AfficheVitesse(const QByteArray Data);
     //Boutons directions
     void on_ButUp_pressed();
     void on_ButUp_released();
@@ -40,9 +41,13 @@ private slots:
     void on_ButLeft_pressed();
     void on_ButLeft_released();
 
+    void on_Parcours_pressed();
+
     //Boutons connexion
     void on_ButConnect_pressed();
     void on_ButDisconnect_pressed();
+
+
 
 
     void on_CAM_DOWN_pressed();
@@ -54,15 +59,12 @@ private slots:
     void on_CAM_LEFT_pressed();
 
 
-    void on_etatbatterie_valueChanged(int value);
-
-    void on_ButConnect_2_clicked();
-
 private:
+    long PV1 = 0;
+    long PV2 = 0;
     int nb;
     Ui::MainWindow *ui;
     QNetworkAccessManager *manager;
     QNetworkRequest request;
-    int etatbatterie;
 };
 #endif // MAINWINDOW_H

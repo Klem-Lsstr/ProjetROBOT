@@ -1,7 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "myrobot.h"
-#include<dos.h>
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -10,16 +9,17 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     robot.doConnect();
+    QWebEngineView *cam = ui->CAM;
+    cam->load(QUrl("http://192.168.1.106:8080/?action=stream"));
 
-    QWebEngineView *page = ui->CAM;
-    page->load(QUrl("http://192.168.1.106:8080/?action=stream"));
-
-    //page->load(QUrl("http://158.58.130.148/mjpg/video.mjpg"));
     manager = new QNetworkAccessManager();
 
 
-    connect(robot.getSocket(), SIGNAL(connected()),this, SLOT(AfficheVitesse()));
+    connect(&robot,SIGNAL(updateUI(QByteArray)),this,SLOT(AfficheVitesse(QByteArray)));
+    //connect(&robot,SIGNAL(sensorsUpdate(MyRobot::Sensors sensorsValue)),this,SLOT(displaySensorsValues(MyRobot::Sensors sensors)));
 
+    ui->progressBar->setMinimum(0);
+    ui->progressBar->setMaximum(185);
 
     QPalette pal = QPalette();
     pal.setColor(QPalette::Window, Qt::lightGray);
@@ -27,22 +27,50 @@ MainWindow::MainWindow(QWidget *parent)
 
 }
 
+
+
+void MainWindow::displaySensorsValues(MyRobot::Sensors sensors){
+    //ui->LCDBaterie->display(sensors.battery);
+    //ui->LCDCurrent->display(sensors.current);
+    ui->V1->display(sensors.speedLeft);
+    ui->V2->display(sensors.speedRight);
+
+}
+
+
+
 MainWindow::~MainWindow()
 {
 
     delete ui;
 }
 
-void MainWindow::AfficheVitesse(){
+void MainWindow::AfficheVitesse(const QByteArray Data){
 
 
-    short V1 = robot.DataReceived[0]/2448*20*0.44;
-    short V2 = robot.DataReceived[9]/2448*20*0.44;
-    ui->Vitesse1->setText(QString(V1));
 
-    ui->Vitesse2->setText(QString(V2));
 
-    qDebug()<<V1;
+    ui->IR1->display((unsigned char)Data[3]);
+    ui->IR3->display((unsigned char)Data[4]);
+    ui->IR2->display((unsigned char)Data[11]);
+    ui->IR4->display((unsigned char)Data[12]);
+    ui->progressBar->setValue((unsigned char)Data[2]);
+
+    unsigned long V = ((long)Data[8]<<24) + ((long)Data[7]<<16) + ((long)Data[6]<<8) + (long)Data[5];
+    unsigned long V1 = V - PV1;
+    PV1 = V;
+    V1 = (V1/2448)*20*0.44;
+    ui->V1->display((unsigned char)V1);
+
+    unsigned long VB2 = ((long)Data[8]<<24) + ((long)Data[7]<<16) + ((long)Data[6]<<8) + (long)Data[5];
+    unsigned long V2 = VB2 - PV2;
+    PV2 = VB2;
+    V2 = (V2/2448)*20*0.44;
+    ui->V2->display((unsigned char)V2);
+    ui->ACTV->setText("Connecté");
+
+
+
 
 }
 
@@ -66,7 +94,9 @@ void MainWindow::on_ButDisconnect_pressed(){
 void MainWindow::on_ButUp_pressed()
 {
 
+    if(ui->ButUp->isDown()){
     robot.SetRobot1(100,100,80);
+    }
     //Mouvement=true;
 
 }
@@ -127,7 +157,33 @@ void MainWindow::on_ButLeft_released()
     //Mouvement=false;
 }
 
+//parcours prédéfini
+void MainWindow::on_Parcours_pressed()
+{
+    qDebug() << "test";
+    int i=0;
+    while(i<100)
+    {
+        robot.SetRobot1(100,100,80);
+        i++;
+    }
+    while(i>=100 && i<200)
+    {
+        robot.SetRobot1(100,50,80);
+        i++;
+    }
+    while(i>=200 && i<300)
+    {
+        robot.SetRobot1(100,100,80);
+        i++;
+    }
+    while(i>=300 && i<400)
+    {
+        robot.SetRobot1(50,100,80);
+        i++;
+    }
 
+}
 
 void MainWindow::on_CAM_DOWN_pressed()
 {
@@ -156,37 +212,4 @@ void MainWindow::on_CAM_LEFT_pressed()
             manager->get(request);
 }
 
-
-
-
-void MainWindow::on_etatbatterie_valueChanged(int etatbatterie)
-{
-    etatbatterie = robot.BatterieFromRobot();
-}
-
-
-void MainWindow::on_ButConnect_2_clicked()
-{
-    int i=0;
-    for(i=0;i<100;i++)
-    {
-        robot.SetRobot1(100,100,80);
-
-    }
-    for(i=100;i<150;i++)
-    {
-        robot.SetRobot1(100,50,80);
-
-    }
-    for(i=150;i<200;i++)
-    {
-        robot.SetRobot1(50,100,80);
-
-    }
-    for(i=200;i<400;i++)
-    {
-        robot.SetRobot1(100,100,80);
-
-    }
-}
 
